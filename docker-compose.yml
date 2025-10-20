@@ -18,25 +18,17 @@ services:
       - KC_HTTP_RELATIVE_PATH=/kc
       # uncomment below to persist Keycloak data
       # - ./kc/h2:/opt/keycloak/data/h2
-  # stigman:
-  #   image: stig-manager:dev
-  #   environment:
-  #     - STIGMAN_OIDC_PROVIDER=http://keycloak:8080/kc/realms/stigman
-  #     - STIGMAN_CLIENT_OIDC_PROVIDER=https://neo-2.localdomain/kc/realms/stigman
-  #     - STIGMAN_CLASSIFICATION=U
-  #     - STIGMAN_DB_HOST=mysql
-  #     - STIGMAN_DB_USER=stigman
-  #     - STIGMAN_DB_PASSWORD=stigmanpw
-  #   init: true
-  # mysql:
-  #   image: mysql:8.0.41
-  #   command: --innodb-buffer-pool-size=1024M --sort_buffer_size=16M 
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=rootpw
-  #     - MYSQL_USER=stigman
-  #     - MYSQL_DATABASE=stigman
-  #     - MYSQL_PASSWORD=stigmanpw
-  #   volumes:
-  #     - ./mysql-data:/var/lib/mysql
-
+  stigman:
+    # image: registry1.dso.mil/ironbank/opensource/stig-manager/stig-manager:1.5.13
+    # image: nuwcdivnpt/stig-manager:latest
+    image: stig-manager:latest
+    environment:
+      - STIGMAN_OIDC_PROVIDER=http://keycloak:8080/kc/realms/stigman
+      - STIGMAN_CLIENT_OIDC_PROVIDER=https://neo-2.localdomain/kc/realms/stigman
+      - STIGMAN_CLASSIFICATION=U
+      - STIGMAN_DB_HOST=morpheus.localdomain
+      - STIGMAN_DB_PORT=50001
+      - STIGMAN_DB_USER=stigman
+      - STIGMAN_DB_PASSWORD=stigman
+    init: true
     
