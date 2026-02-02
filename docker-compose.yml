@@ -16,19 +16,36 @@ services:
       - KC_PROXY_HEADERS=xforwarded
       - KC_HOSTNAME_STRICT=false
       - KC_HTTP_RELATIVE_PATH=/kc
-      # uncomment below to persist Keycloak data
+      # uncomment below to persist Keycloak datadock
       # - ./kc/h2:/opt/keycloak/data/h2
   stigman:
     # image: registry1.dso.mil/ironbank/opensource/stig-manager/stig-manager:1.5.13
-    # image: nuwcdivnpt/stig-manager:latest
-    image: stig-manager:latest
+    image: nuwcdivnpt/stig-manager:new-client
+    # image: stig-manager:1.5.15
     environment:
-      - STIGMAN_OIDC_PROVIDER=http://keycloak:8080/kc/realms/stigman
-      - STIGMAN_CLIENT_OIDC_PROVIDER=https://neo-2.localdomain/kc/realms/stigman
+      - STIGMAN_OIDC_PROVIDER=https://neo-2.localdomain/kc/realms/stigman
+      - STIGMAN_OIDC_CA_CERTS=/home/node/tls/csmig-ca.crt.pem
       - STIGMAN_CLASSIFICATION=U
-      - STIGMAN_DB_HOST=morpheus.localdomain
-      - STIGMAN_DB_PORT=50001
+      - STIGMAN_DB_HOST=db
+      - STIGMAN_DB_PORT=3306
       - STIGMAN_DB_USER=stigman
       - STIGMAN_DB_PASSWORD=stigman
+      - STIGMAN_DEV_ALLOW_INSECURE_TOKENS=true
+    volumes:
+      - /home/csmig/dev/x509/certs/ca/csmig-ca.crt.pem:/home/node/tls/csmig-ca.crt.pem
     init: true
-    
+  db:
+    image: mysql:8.4
+    user: 1000:1000
+    ports:
+      - "50001:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpw
+      - MYSQL_USER=stigman
+      - MYSQL_PASSWORD=stigman
+      - MYSQL_DATABASE=stigman
+    volumes:
+      - /home/csmig/mysql-data/stig-manager:/var/lib/mysql
+    command: --innodb-buffer-pool-size=1147483648 --disable-log-bin
+    cap_add:
+      - SYS_NICE  # workaround MySQL logging bug => mbind: Operation not permitted 
